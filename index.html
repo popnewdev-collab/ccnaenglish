@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>CCNA Prep Quiz</title>
+  <meta name="description" content="Teste seus conhecimentos para a certificação CCNA com este quiz interativo." />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inter:400,600&display=swap">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <div class="app">
+    <header>
+      <div class="mode-header">
+        <span class="mode-indicator" id="modeIndicator">Modo: <strong>Quiz</strong></span>
+      </div>
+      <div class="controls" role="group" aria-label="Controles do Quiz">
+        <button id="btnQuiz" class="btn-ghost" aria-pressed="true" tabindex="0">Quiz</button>
+        <button id="btnSimulado" class="btn-ghost" aria-pressed="false" tabindex="0">Simulado</button>
+        <label for="categorySelect" class="small">Categorias:</label>
+        <select id="categorySelect">
+          <option value="all">Todas</option>
+        </select>
+      </div>
+    </header>
+
+    <div class="actions-inline" id="actionsInline">
+      <button id="restartBtn" class="btn-ghost" aria-label="Reiniciar quiz">Reiniciar</button>
+      <div class="timer-box">
+        <span class="small">Tempo:</span>
+        <span class="timer" id="timerDisplay" aria-live="polite">--:--:--</span>
+      </div>
+    </div>
+
+    <div class="stats-inline" id="statsInline" role="region" aria-label="Estatísticas do quiz">
+      <span><strong>Perguntas:</strong> <span id="totalAsked">0</span></span>
+      <span><strong>Acertos:</strong> <span id="totalCorrect">0</span></span>
+      <span><strong>Erros:</strong> <span id="totalWrong">0</span></span>
+      <span><strong>Progresso:</strong> <span id="progress">0%</span></span>
+    </div>
+
+    <main>
+      <section>
+        <div class="card" id="questionCard" tabindex="0">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div>
+              <div class="question-num" id="qMeta" aria-live="polite">Carregando perguntas...</div>
+              <div class="question-text" id="questionText">—</div>
+              <img id="questionImage" class="question-image" src="" alt="Imagem da pergunta" style="display: none;">
+            </div>
+          </div>
+          <div class="options" id="options" role="group" aria-label="Alternativas"></div>
+          <div id="explanation" class="explanation" style="display: none;"></div>
+          <div style="display: flex; justify-content: space-between; margin-top: 0.875rem; gap: 0.5rem;">
+            <div class="hint">Selecione as alternativas corretas. A validação é automática.</div>
+            <button id="nextBtn" class="btn-primary" aria-label="Próxima pergunta" tabindex="0">Próxima</button>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <div>
+        Observação: Configure as variáveis no arquivo <code>config.js</code> para carregar perguntas.<br>
+        <span class="visually-hidden" id="accessibilityStatus" aria-live="assertive"></span>
+      </div>
+    </footer>
+
+    <div class="final-score-modal" id="finalScoreModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle" tabindex="-1">
+      <!-- Conteúdo gerado dinamicamente -->
+    </div>
+  </div>
+
+  <script src="js/config.js" defer></script>
+  <script src="js/script.js" defer></script>
+</body>
+</html>

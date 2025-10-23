@@ -1,0 +1,447 @@
+/* === Variáveis Globais === */
+:root {
+  --bg: #0f172a;
+  --card: #0b1220;
+  --accent: #0ea5a4;
+  --muted: #94a3b8;
+  --success: #16a34a;
+  --danger: #ef4444;
+  --focus: #fbbf24;
+  --text-primary: #e6eef6;
+  --border: rgba(255,255,255,.08);
+  --shadow: 0 6px 18px rgba(0,0,0,.4);
+  --transition: all 0.2s ease-in-out;
+}
+
+/* === Reset e Base === */
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  font-family: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, 'Helvetica Neue', Arial, sans-serif;
+  color: var(--text-primary);
+  background: linear-gradient(180deg, #071028 0%, #08122a 100%);
+}
+
+body {
+  padding: 1rem;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+.app {
+  max-width: 980px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+/* === Cabeçalho === */
+header {
+  margin-bottom: 1rem;
+}
+
+.mode-header {
+  margin-bottom: 0.5rem;
+  text-align: left;
+}
+
+.mode-indicator {
+  padding: 0.375rem 0.625rem;
+  border-radius: 0.5rem;
+  background: rgba(255,255,255,0.03);
+  font-weight: 700;
+  display: inline-block;
+}
+
+.controls {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+/* === Controles e Botões === */
+button, select {
+  background: linear-gradient(180deg, #0b1b2a, #06101a);
+  border: 1px solid var(--border);
+  color: var(--text-primary);
+  padding: 0.625rem 0.75rem;
+  border-radius: 0.625rem;
+  font-weight: 600;
+  font-family: inherit;
+  transition: var(--transition);
+  outline: none;
+  cursor: pointer;
+}
+
+button:hover, select:hover {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px rgba(14,165,164,0.2);
+}
+
+button:focus, select:focus {
+  border-color: var(--focus);
+  box-shadow: 0 0 0 2px var(--focus);
+}
+
+.btn-primary {
+  background: linear-gradient(180deg, var(--accent), #c0a89f);
+  color: #042022;
+  border: none;
+}
+
+.btn-primary:hover {
+  background: linear-gradient(180deg, #0bb8b3, #0ca89f);
+}
+
+.btn-ghost {
+  background: transparent;
+  border: 1px solid rgba(255,255,255,.10);
+}
+
+.btn-ghost:hover {
+  background: rgba(255,255,255,0.05);
+}
+
+.btn-ghost[aria-pressed="true"] {
+  background: rgba(255,255,255,0.1);
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px rgba(14,165,164,0.2);
+}
+
+/* === Ações Inline === */
+.actions-inline {
+  display: none;
+  justify-content: center;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(255,255,255,0.03);
+  border-radius: 0.5rem;
+  padding: 0.625rem 1.125rem;
+  margin-bottom: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.actions-inline.simulado-active {
+  display: flex;
+}
+
+.timer-box {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(255,255,255,0.03);
+  border-radius: 0.5rem;
+  padding: 0.375rem 1.125rem;
+  min-width: 130px;
+  justify-content: center;
+}
+
+.timer {
+  font-size: 1.09rem;
+  font-weight: 800;
+  color: var(--accent);
+}
+
+/* === Estatísticas Inline === */
+.stats-inline {
+  display: flex;
+  gap: 1.5rem;
+  justify-content: center;
+  align-items: center;
+  margin: 0.625rem 0 1.25rem 0;
+  font-size: 1rem;
+  background: rgba(255,255,255,0.03);
+  border-radius: 0.5rem;
+  padding: 0.625rem 1.125rem;
+}
+
+.stats-inline span {
+  color: var(--muted);
+}
+
+.stats-inline strong {
+  color: var(--text-primary);
+  font-weight: 600;
+  margin-right: 0.125rem;
+}
+
+/* === Cartão de Pergunta === */
+main {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.875rem;
+}
+
+.card {
+  background: rgba(255,255,255,0.04);
+  padding: 1rem;
+  border-radius: 0.875rem;
+  box-shadow: var(--shadow);
+  transition: var(--transition);
+}
+
+.card:hover {
+  box-shadow: 0 8px 24px rgba(0,0,0,.5);
+}
+
+.card:focus {
+  outline: none;
+}
+
+.question-num {
+  font-size: 0.9rem;
+  color: var(--muted);
+}
+
+.question-text {
+  font-size: 1.08rem;
+  margin: 0.5rem 0;
+}
+
+.question-image {
+  max-width: 100%;
+  border-radius: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.options {
+  display: grid;
+  gap: 0.625rem;
+  margin-top: 0.5rem;
+}
+
+.opt {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.8125rem 0.625rem;
+  border-radius: 0.625rem;
+  border: 2px solid rgba(255,255,255,.04);
+  background: none;
+  cursor: pointer;
+  transition: var(--transition);
+  font-size: 1rem;
+  font-family: inherit;
+  outline: none;
+  user-select: none;
+  text-align: left;
+}
+
+.opt:hover {
+  border-color: var(--accent);
+  background: rgba(14,165,164,0.1);
+}
+
+.opt:focus {
+  border-color: var(--focus);
+  box-shadow: 0 0 0 2px rgba(251,191,36,0.3);
+}
+
+.opt[aria-pressed="true"] {
+  border: 2px solid var(--focus);
+  background: rgba(251,191,36,0.1);
+}
+
+.opt.opt-disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.opt .letter {
+  min-width: 34px;
+  height: 34px;
+  border-radius: 0.5rem;
+  display: grid;
+  place-items: center;
+  background: rgba(255,255,255,0.04);
+  font-weight: 700;
+  font-size: 1.1em;
+}
+
+.opt.correct {
+  border-color: rgba(22,163,74,.7);
+  background: linear-gradient(90deg, rgba(16,185,129,0.09), rgba(16,185,129,0.05));
+}
+
+.opt.wrong {
+  border-color: rgba(239,68,68,.35);
+  background: linear-gradient(90deg, rgba(239,68,68,0.07), rgba(239,68,68,0.01));
+}
+
+.opt img {
+  max-height: 80px;
+  border-radius: 0.375rem;
+}
+
+.explanation {
+  margin-top: 0.75rem;
+  padding: 0.75rem;
+  border-radius: 0.5rem;
+  background: rgba(255,255,255,0.06);
+  color: var(--muted);
+  font-size: 0.99rem;
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* === Rodapé e Dicas === */
+.small {
+  font-size: 0.89rem;
+  color: var(--muted);
+}
+
+footer {
+  margin-top: 1rem;
+  color: var(--muted);
+  font-size: 0.9rem;
+  text-align: center;
+}
+
+.hint {
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+.visually-hidden {
+  position: absolute !important;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  overflow: hidden;
+  border: 0;
+  clip: rect(0,0,0,0);
+  white-space: nowrap;
+}
+
+/* === Modal de Pontuação Final === */
+.final-score-modal {
+  background: var(--card);
+  color: var(--text-primary);
+  border-radius: 1rem;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.6);
+  padding: 2rem 1.375rem;
+  max-width: 600px;
+  max-height: 80vh;
+  overflow-y: auto;
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 999;
+  display: none;
+  text-align: center;
+  box-sizing: border-box;
+  transition: var(--transition);
+}
+
+.final-score-modal.visible {
+  display: block;
+  animation: modalFadeIn 0.3s ease-in-out;
+}
+
+@keyframes modalFadeIn {
+  from { opacity: 0; transform: translate(-50%, -55%); }
+  to { opacity: 1; transform: translate(-50%, -50%); }
+}
+
+.final-score-modal h2 {
+  margin-top: 0;
+}
+
+.final-score-modal ul {
+  text-align: left;
+  margin: 0 auto 1.125rem auto;
+  display: inline-block;
+}
+
+.final-score-modal button {
+  margin-top: 1.125rem;
+}
+
+.final-score-modal .aprovado {
+  color: var(--success);
+  font-weight: bold;
+}
+
+.final-score-modal .reprovado {
+  color: var(--danger);
+  font-weight: bold;
+}
+
+.question-review {
+  margin: 1rem 0;
+  padding: 0.75rem;
+  background: rgba(255,255,255,0.06);
+  border-radius: 0.5rem;
+}
+
+.question-review p {
+  margin: 0.5rem 0;
+  word-wrap: break-word;
+}
+
+/* === Media Queries para Responsividade === */
+@media (max-width: 700px) {
+  body {
+    padding: 0.5rem;
+  }
+
+  .stats-inline, .actions-inline {
+    font-size: 0.98rem;
+    gap: 0.625rem;
+    padding: 0.5rem 0.25rem;
+    flex-wrap: wrap;
+  }
+
+  .controls {
+    flex-wrap: nowrap;
+    gap: 0.25rem;
+    overflow-x: auto;
+    padding-bottom: 0.375rem;
+    -webkit-overflow-scrolling: touch;
+    justify-content: flex-start;
+  }
+
+  .mode-header {
+    text-align: center;
+    margin-bottom: 0.375rem;
+  }
+
+  .mode-indicator {
+    font-size: 0.85rem;
+    padding: 0.25rem 0.5rem;
+  }
+
+  #btnQuiz, #btnSimulado, #categorySelect {
+    font-size: 0.85rem;
+    min-width: 70px;
+    padding: 0.5rem 0.625rem;
+  }
+
+  #categorySelect {
+    width: 100px;
+    min-width: 70px;
+  }
+
+  .final-score-modal {
+    width: 95vw;
+    max-width: 580px;
+    min-width: 300px;
+    padding: 1.75rem 1.25rem;
+    box-sizing: border-box;
+  }
+
+  .question-review img {
+    max-width: 100%;
+    max-height: 150px;
+    object-fit: contain;
+  }
+}
