@@ -11,10 +11,10 @@ const CATEGORIES = [
 const SIM_CONFIG = {
     "Network Fundamentals": 20,
     "Network Access": 20,
-    "IP connectivity": 25,
-    "IP services": 10,
+    "IP Connectivity": 25,
+    "IP Services": 10,
     "Security Fundamentals": 15,
-    "Programmability": 10
+    "Automation & Programmability": 10
 };
 const SIM_TOTAL = Object.values(SIM_CONFIG).reduce((a, b) => a + b, 0);
 
