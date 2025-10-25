@@ -3,10 +3,10 @@ const SHEET_CSV_URL = "";
 const CATEGORIES = [
     "Network Fundamentals",
     "Network Access",
-    "IP connectivity",
-    "IP services",
+    "IP Connectivity",
+    "IP Services",
     "Security Fundamentals",
-    "Programmability"
+    "Automation & Programmability"
 ];
 const SIM_CONFIG = {
     "Network Fundamentals": 20,
