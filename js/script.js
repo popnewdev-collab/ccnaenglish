@@ -107,7 +107,7 @@ async function loadSheet() {
         }
 
         allQuestions = (data || []).map((r, idx) => ({
-            id: r.id || idx + 1,
+            id: String(r.id || idx + 1), // MODIFICAÇÃO: Normaliza ID para string para evitar problemas de tipo no Set
             question: (r.question || r.pergunta || '').toString(),
             questionImage: (r.questionImage || r.questionimage || r.image || '').toString(),
             options: {
@@ -170,7 +170,7 @@ function renderQuestion(q) {
     current = q;
     qMeta.textContent = mode === 'simulado' 
         ? `Pergunta ${simIndex + 1} de ${SIM_TOTAL} — Categoria: ${escapeHTML(q.category || '—')}`
-        : `ID ${escapeHTML(q.id.toString())} — Categoria: ${escapeHTML(q.category || '—')}`;
+        : `ID ${escapeHTML(q.id)} — Categoria: ${escapeHTML(q.category || '—')}`; // MODIFICAÇÃO: Removido .toString() desnecessário, já que id é string
 
     qText.textContent = q.question;
 
@@ -217,8 +217,7 @@ function renderQuestion(q) {
     setTimeout(() => document.activeElement.blur(), 120);
     document.getElementById('questionCard').animate([{ opacity: 0 }, { opacity: 1 }], { duration: 300 });
 
-    // MODIFICAÇÃO: Marca a pergunta como exibida assim que renderizada, para evitar repetições.
-    answeredQuestions.add(q.id);
+    answeredQuestions.add(q.id); // MODIFICAÇÃO: Mantido aqui para marcar como exibida
 }
 
 // === Exibição de Explicação ===
@@ -286,7 +285,6 @@ function validateAnswer(selected) {
             setTimeout(nextQuestion, 1000);
         }
     } else {
-        // MODIFICAÇÃO: Removido answeredQuestions.add(current.id); pois agora é feito no renderQuestion.
         const cat = current.category;
         if (isCorrect) simCategoryScores[cat] = (simCategoryScores[cat] || 0) + 1;
         simIndex++;
@@ -325,12 +323,10 @@ function nextQuestion() {
         return;
     }
 
-    // MODIFICAÇÃO: Sempre filtra perguntas não exibidas, removendo o condicional de mode e o || candidates.
-    // Isso garante no-repeat até todas serem exibidas, em qualquer modo (embora simulado não use esta função).
     const pool = candidates.filter(q => !answeredQuestions.has(q.id));
 
     if (pool.length === 0) {
-        document.getElementById('qMeta').textContent = 'Todas as perguntas respondidas. Reiniciando...';
+        document.getElementById('qMeta').textContent = 'Todas as perguntas exibidas nesta categoria. Reiniciando...';
         setTimeout(() => {
             answeredQuestions.clear();
             nextQuestion();
@@ -443,6 +439,7 @@ function showSimulatedScore(timeout = false) {
         updateStats();
         updateStatsInlineVisibility();
         updateActionsInlineVisibility();
+        answeredQuestions.clear(); // MODIFICAÇÃO: Limpa o set ao fechar o modal para reiniciar fresco no quiz
         nextQuestion();
     };
 }
@@ -454,6 +451,7 @@ document.getElementById('btnQuiz').addEventListener('click', () => {
     stopTimer();
     document.getElementById('timerDisplay').textContent = '--:--:--';
     asked = correctCount = wrongCount = 0;
+    answeredQuestions.clear(); // MODIFICAÇÃO: Limpa o set ao entrar no modo quiz
     updateStats();
     document.getElementById('btnQuiz').setAttribute('aria-pressed', 'true');
     document.getElementById('btnSimulado').setAttribute('aria-pressed', 'false');
@@ -496,7 +494,10 @@ document.getElementById('restartBtn').addEventListener('click', () => {
 });
 
 document.getElementById('categorySelect').addEventListener('change', () => {
-    if (mode === 'quiz') nextQuestion();
+    if (mode === 'quiz') {
+        answeredQuestions.clear(); // MODIFICAÇÃO: Limpa o set ao mudar de categoria para reiniciar o ciclo fresco na nova categoria
+        nextQuestion();
+    }
 });
 
 // === Inicialização ===
