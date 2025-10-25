@@ -216,6 +216,9 @@ function renderQuestion(q) {
 
     setTimeout(() => document.activeElement.blur(), 120);
     document.getElementById('questionCard').animate([{ opacity: 0 }, { opacity: 1 }], { duration: 300 });
+
+    // MODIFICAÇÃO: Marca a pergunta como exibida assim que renderizada, para evitar repetições.
+    answeredQuestions.add(q.id);
 }
 
 // === Exibição de Explicação ===
@@ -283,7 +286,7 @@ function validateAnswer(selected) {
             setTimeout(nextQuestion, 1000);
         }
     } else {
-        answeredQuestions.add(current.id);
+        // MODIFICAÇÃO: Removido answeredQuestions.add(current.id); pois agora é feito no renderQuestion.
         const cat = current.category;
         if (isCorrect) simCategoryScores[cat] = (simCategoryScores[cat] || 0) + 1;
         simIndex++;
@@ -322,7 +325,10 @@ function nextQuestion() {
         return;
     }
 
-    const pool = mode === 'quiz' ? candidates : candidates.filter(q => !answeredQuestions.has(q.id)) || candidates;
+    // MODIFICAÇÃO: Sempre filtra perguntas não exibidas, removendo o condicional de mode e o || candidates.
+    // Isso garante no-repeat até todas serem exibidas, em qualquer modo (embora simulado não use esta função).
+    const pool = candidates.filter(q => !answeredQuestions.has(q.id));
+
     if (pool.length === 0) {
         document.getElementById('qMeta').textContent = 'Todas as perguntas respondidas. Reiniciando...';
         setTimeout(() => {
