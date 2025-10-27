@@ -395,6 +395,24 @@ footer {
   word-wrap: break-word;
 }
 
+/* === Estilo para Mensagem de Erro (Toast) === */
+.error-message {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--danger);
+  color: var(--text-primary);
+  padding: 0.75rem 1.25rem;
+  border-radius: 0.5rem;
+  z-index: 1000;
+  box-shadow: var(--shadow);
+  font-size: 1rem;
+  font-weight: 600;
+  animation: fadeIn 0.3s ease-in-out;
+  transition: var(--transition);
+}
+
 /* === Media Queries para Responsividade === */
 @media (max-width: 700px) {
   body {
@@ -450,5 +468,11 @@ footer {
     max-width: 100%;
     max-height: 150px;
     object-fit: contain;
+  }
+
+  .error-message {
+    width: 90%;
+    font-size: 0.9rem;
+    padding: 0.5rem 1rem;
   }
 }
