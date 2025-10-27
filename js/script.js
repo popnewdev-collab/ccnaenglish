@@ -1,4 +1,4 @@
-// === Configurações ===
+// === Settings ===
 const SHEET_CSV_URL = "";
 const CATEGORIES = [
     "Network Fundamentals",
@@ -18,7 +18,7 @@ const SIM_CONFIG = {
 };
 const SIM_TOTAL = Object.values(SIM_CONFIG).reduce((a, b) => a + b, 0);
 
-// === Variáveis de Estado ===
+// === State Variables ===
 let allQuestions = [];
 let current = null;
 let answeredQuestions = new Set();
@@ -31,7 +31,7 @@ let timer = null;
 let timeLeft = 0;
 let simCategoryScores = {};
 
-// === Funções Auxiliares ===
+// === Helper Functions ===
 function escapeHTML(str = '') {
     return str.replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
 }
@@ -83,7 +83,7 @@ function parseCSV(csv) {
     });
 }
 
-// === Função Auxiliar para Mostrar Erros ===
+// === Helper Function to Show Errors ===
 function showError(message) {
     const errorDiv = document.createElement('div');
     errorDiv.className = 'error-message';
@@ -97,7 +97,7 @@ function showError(message) {
     setTimeout(() => errorDiv.remove(), 5000);
 }
 
-// === Função para Mostrar Mensagem Temporária de Acerto ===
+// === Function to Show Temporary Correct Answer Message ===
 function showCorrectMessage() {
     const messageDiv = document.createElement('div');
     messageDiv.className = 'correct-message';
@@ -107,31 +107,31 @@ function showCorrectMessage() {
         z-index: 1000; box-shadow: 0 2px 5px rgba(0,0,0,0.2);
     `;
     messageDiv.setAttribute('aria-live', 'assertive');
-    messageDiv.textContent = 'Acertou ✔';
+    messageDiv.textContent = 'Correct ✔';
     document.body.appendChild(messageDiv);
     setTimeout(() => messageDiv.remove(), 1000);
 }
 
-// === Carregamento de Dados ===
+// === Data Loading ===
 async function loadSheet() {
     try {
         if (!Config?.SHEET_API_URL) {
-            document.getElementById('qMeta').textContent = 'Erro: Configuração da API não encontrada em config.js.';
+            document.getElementById('qMeta').textContent = 'Error: API configuration not found in config.js.';
             return;
         }
 
         let data = null;
         if (Config.SHEET_API_URL) {
             const res = await fetch(Config.SHEET_API_URL);
-            if (!res.ok) throw new Error(`Falha na API: ${res.status}`);
+            if (!res.ok) throw new Error(`API Failure: ${res.status}`);
             data = await res.json();
         } else if (SHEET_CSV_URL && SHEET_CSV_URL.length > 10 && !SHEET_CSV_URL.includes('PASTE_YOUR')) {
             const res = await fetch(SHEET_CSV_URL);
-            if (!res.ok) throw new Error(`Falha ao buscar CSV: ${res.status}`);
+            if (!res.ok) throw new Error(`Failed to fetch CSV: ${res.status}`);
             const txt = await res.text();
             data = parseCSV(txt);
         } else {
-            document.getElementById('qMeta').textContent = 'Configure SHEET_API_URL ou SHEET_CSV_URL em config.js.';
+            document.getElementById('qMeta').textContent = 'Configure SHEET_API_URL or SHEET_CSV_URL in config.js.';
             return;
         }
 
@@ -167,7 +167,7 @@ async function loadSheet() {
         });
 
         if (allQuestions.length === 0) {
-            document.getElementById('qMeta').textContent = 'Sem perguntas válidas na planilha.';
+            document.getElementById('qMeta').textContent = 'No valid questions available at the moment, please try again later.';
             return;
         }
 
@@ -175,11 +175,11 @@ async function loadSheet() {
         nextQuestion();
     } catch (err) {
         console.error(err);
-        document.getElementById('qMeta').textContent = `Erro ao carregar: ${err.message}`;
+        document.getElementById('qMeta').textContent = `Error loading: ${err.message}`;
     }
 }
 
-// === Renderização de Pergunta ===
+// === Question Rendering ===
 function renderQuestion(q) {
     const qMeta = document.getElementById('qMeta');
     const qText = document.getElementById('questionText');
@@ -188,7 +188,7 @@ function renderQuestion(q) {
     const expl = document.getElementById('explanation');
 
     if (!q) {
-        qMeta.textContent = 'Nenhuma pergunta disponível';
+        qMeta.textContent = 'No question available';
         qText.textContent = '—';
         opts.innerHTML = '';
         expl.style.display = 'none';
@@ -197,9 +197,9 @@ function renderQuestion(q) {
     }
 
     current = q;
-    qMeta.textContent = mode === 'simulado' 
-        ? `Pergunta ${simIndex + 1} de ${SIM_TOTAL} — Categoria: ${escapeHTML(q.category || '—')}`
-        : `ID ${escapeHTML(q.id)} — Categoria: ${escapeHTML(q.category || '—')}`;
+    qMeta.textContent = mode === 'simulated' 
+        ? `Question ${simIndex + 1} of ${SIM_TOTAL} — Category: ${escapeHTML(q.category || '—')}`
+        : `ID ${escapeHTML(q.id)} — Category: ${escapeHTML(q.category || '—')}`;
 
     qText.textContent = q.question;
 
@@ -224,12 +224,12 @@ function renderQuestion(q) {
         btn.className = 'opt';
         btn.dataset.letter = letter;
         btn.setAttribute('aria-pressed', 'false');
-        btn.setAttribute('aria-label', `Alternativa ${letter}: ${txt}`);
+        btn.setAttribute('aria-label', `Option ${letter}: ${txt}`);
         btn.tabIndex = 0;
 
         let imgHtml = '';
         if (q.optionImages?.[letter]) {
-            imgHtml = `<img src="${escapeHTML(q.optionImages[letter])}" alt="Imagem da alternativa ${letter}">`;
+            imgHtml = `<img src="${escapeHTML(q.optionImages[letter])}" alt="Image for option ${letter}">`;
         }
 
         btn.innerHTML = `<span class="letter">${letter}</span><span class="text">${escapeHTML(txt)}</span>${imgHtml}`;
@@ -249,11 +249,11 @@ function renderQuestion(q) {
     answeredQuestions.add(q.id);
 }
 
-// === Exibição de Explicação ===
+// === Explanation Display ===
 function showExplanation(isCorrect) {
     const expl = document.getElementById('explanation');
     expl.style.display = 'block';
-    expl.innerHTML = `<strong>${isCorrect ? 'Acertou ✔' : 'Errou ✖'}</strong><div style="margin-top:0.5rem">${escapeHTML(current.explanation || 'Sem explicação disponível.')}</div>`;
+    expl.innerHTML = `<strong>${isCorrect ? 'Correct ✔' : 'Incorrect ✖'}</strong><div style="margin-top:0.5rem">${escapeHTML(current.explanation || 'No explanation available.')}</div>`;
 
     if (!isCorrect) {
         window.scrollTo({
@@ -269,10 +269,10 @@ function showExplanation(isCorrect) {
     }
 
     const acc = document.getElementById('accessibilityStatus');
-    acc.textContent = isCorrect ? 'Resposta correta' : 'Resposta errada';
+    acc.textContent = isCorrect ? 'Correct answer' : 'Incorrect answer';
 }
 
-// === Seleção e Validação de Opções ===
+// === Option Selection and Validation ===
 function onSelectOption(e) {
     if (!current) return;
     const btn = e.currentTarget;
@@ -299,7 +299,7 @@ function validateAnswer(selected) {
     if (isCorrect) correctCount++; else wrongCount++;
     updateStats();
 
-    if (mode === 'simulado') {
+    if (mode === 'simulated') {
         simAnswers.push({ question: current, selected, isCorrect });
     }
 
@@ -310,18 +310,18 @@ function validateAnswer(selected) {
             if (selected.includes(l) && !correct.includes(l)) o.classList.add('wrong');
         });
 
-        // Limpa e oculta o elemento de explicação
+        // Clear and hide the explanation element
         const expl = document.getElementById('explanation');
         expl.style.display = 'none';
         expl.innerHTML = '';
 
         if (isCorrect) {
-            // Mostra mensagem temporária de acerto
+            // Show temporary correct answer message
             showCorrectMessage();
-            // Avança para a próxima pergunta após 1 segundo
+            // Move to the next question after 1 second
             setTimeout(nextQuestion, 1000);
         } else {
-            // Mostra explicação apenas quando errar
+            // Show explanation only when incorrect
             showExplanation(false);
         }
     } else {
@@ -336,7 +336,7 @@ function validateAnswer(selected) {
     }
 }
 
-// === Atualização de Estatísticas ===
+// === Statistics Update ===
 function updateStats() {
     document.getElementById('totalAsked').textContent = asked;
     document.getElementById('totalCorrect').textContent = correctCount;
@@ -351,22 +351,22 @@ function updateStatsInlineVisibility() {
 
 function updateActionsInlineVisibility() {
     const actions = document.getElementById('actionsInline');
-    actions.classList.toggle('simulado-active', mode === 'simulado');
+    actions.classList.toggle('simulated-active', mode === 'simulated');
 }
 
-// === Navegação entre Perguntas ===
+// === Question Navigation ===
 function nextQuestion() {
     const cat = document.getElementById('categorySelect').value;
     let candidates = cat === 'all' ? allQuestions : allQuestions.filter(q => q.category === cat);
     if (candidates.length === 0) {
-        document.getElementById('qMeta').textContent = 'Nenhuma pergunta disponível para esta categoria.';
+        document.getElementById('qMeta').textContent = 'No questions available for this category.';
         return;
     }
 
     const pool = candidates.filter(q => !answeredQuestions.has(q.id));
 
     if (pool.length === 0) {
-        document.getElementById('qMeta').textContent = 'Todas as perguntas exibidas nesta categoria. Reiniciando...';
+        document.getElementById('qMeta').textContent = 'All questions in this category have been displayed. Restarting...';
         setTimeout(() => {
             answeredQuestions.clear();
             nextQuestion();
@@ -378,22 +378,22 @@ function nextQuestion() {
     renderQuestion(q);
 }
 
-// === Preparação do Modo Simulado ===
+// === Simulated Mode Preparation ===
 function prepareSimulated() {
     simQuestions = [];
     simAnswers = [];
     simCategoryScores = {};
 
-    // Verifica se há perguntas suficientes para cada categoria
+    // Check if there are enough questions for each category
     for (const cat in SIM_CONFIG) {
         const questionsCat = allQuestions.filter(q => q.category === cat);
         if (questionsCat.length < SIM_CONFIG[cat]) {
-            showError(`Não há perguntas suficientes para a categoria "${cat}". Necessário: ${SIM_CONFIG[cat]}, Disponível: ${questionsCat.length}.`);
+            showError(`Not enough questions for the category "${cat}". Required: ${SIM_CONFIG[cat]}, Available: ${questionsCat.length}.`);
             return false;
         }
     }
 
-    // Se todas as categorias têm perguntas suficientes, prossegue
+    // If all categories have enough questions, proceed
     for (const cat in SIM_CONFIG) {
         const questionsCat = shuffleArray(allQuestions.filter(q => q.category === cat));
         simQuestions.push(...questionsCat.slice(0, SIM_CONFIG[cat]));
@@ -401,7 +401,7 @@ function prepareSimulated() {
     }
 
     if (simQuestions.length !== SIM_TOTAL) {
-        showError(`Erro ao preparar o simulado: Foram selecionadas ${simQuestions.length} perguntas, mas o esperado era ${SIM_TOTAL}.`);
+        showError(`Error preparing the simulated test: ${simQuestions.length} questions were selected, but ${SIM_TOTAL} were expected.`);
         return false;
     }
 
@@ -418,7 +418,7 @@ function loadSimQuestion(i) {
     renderQuestion(simQuestions[i]);
 }
 
-// === Gerenciamento do Timer ===
+// === Timer Management ===
 function startTimer(seconds) {
     stopTimer();
     timeLeft = seconds;
@@ -438,37 +438,37 @@ function stopTimer() {
     timer = null;
 }
 
-// === Exibição de Pontuação Final no Simulado ===
+// === Display Final Score in Simulated Mode ===
 function showSimulatedScore(timeout = false) {
     stopTimer();
     const modal = document.getElementById('finalScoreModal');
-    let html = `<h2 id="modalTitle">${timeout ? 'Tempo Esgotado!' : 'Simulado Finalizado!'}</h2>`;
-    html += `<p>Acertos: <strong>${correctCount}</strong> de ${SIM_TOTAL} (${Math.round((correctCount / SIM_TOTAL) * 100)}%)</p>`;
+    let html = `<h2 id="modalTitle">${timeout ? 'Time Expired!' : 'Simulated Test Completed!'}</h2>`;
+    html += `<p>Correct Answers: <strong>${correctCount}</strong> out of ${SIM_TOTAL} (${Math.round((correctCount / SIM_TOTAL) * 100)}%)</p>`;
     html += '<ul>';
     for (const cat in SIM_CONFIG) {
-        html += `<li>${cat}: <strong>${simCategoryScores[cat] || 0}</strong> de ${SIM_CONFIG[cat]}</li>`;
+        html += `<li>${cat}: <strong>${simCategoryScores[cat] || 0}</strong> out of ${SIM_CONFIG[cat]}</li>`;
     }
     html += '</ul>';
-    const aprovado = correctCount >= 82;
-    html += `<p class="${aprovado ? 'aprovado' : 'reprovado'}" style="font-size:1.2em">Resultado: ${aprovado ? 'APROVADO 🎉' : 'REPROVADO ❌'}</p>`;
-    html += '<h3>Revisão das Respostas</h3>';
+    const approved = correctCount >= 82;
+    html += `<p class="${approved ? 'approved' : 'failed'}" style="font-size:1.2em">Result: ${approved ? 'APPROVED 🎉' : 'FAILED ❌'}</p>`;
+    html += '<h3>Answer Review</h3>';
     simAnswers.forEach((ans, idx) => {
         const q = ans.question;
         const selected = ans.selected;
         const correct = q.correct;
         const isCorrect = ans.isCorrect;
         html += '<div class="question-review">';
-        html += `<p><strong>Pergunta ${idx + 1}:</strong> ${escapeHTML(q.question)}</p>`;
+        html += `<p><strong>Question ${idx + 1}:</strong> ${escapeHTML(q.question)}</p>`;
         if (q.questionImage) {
-            html += `<img src="${escapeHTML(q.questionImage)}" alt="Imagem da pergunta ${idx + 1}" style="max-width:100%; border-radius:0.5rem; margin:0.5rem 0;">`;
+            html += `<img src="${escapeHTML(q.questionImage)}" alt="Image for question ${idx + 1}" style="max-width:100%; border-radius:0.5rem; margin:0.5rem 0;">`;
         }
-        html += `<p><strong>Sua resposta:</strong> ${selected.length ? selected.map(l => `${l}: ${escapeHTML(q.options[l] || '—')}`).join(', ') : 'Nenhuma selecionada'}</p>`;
-        html += `<p><strong>Resposta correta:</strong> ${correct.map(l => `${l}: ${escapeHTML(q.options[l] || '—')}`).join(', ')}</p>`;
-        html += `<p><strong>Explicação:</strong> ${escapeHTML(q.explanation || 'Sem explicação.')}</p>`;
-        html += `<p><strong>Resultado:</strong> <span class="${isCorrect ? 'aprovado' : 'reprovado'}">${isCorrect ? 'Correta ✔' : 'Errada ✖'}</span></p>`;
+        html += `<p><strong>Your answer:</strong> ${selected.length ? selected.map(l => `${l}: ${escapeHTML(q.options[l] || '—')}`).join(', ') : 'None selected'}</p>`;
+        html += `<p><strong>Correct answer:</strong> ${correct.map(l => `${l}: ${escapeHTML(q.options[l] || '—')}`).join(', ')}</p>`;
+        html += `<p><strong>Explanation:</strong> ${escapeHTML(q.explanation || 'No explanation.')}</p>`;
+        html += `<p><strong>Result:</strong> <span class="${isCorrect ? 'approved' : 'failed'}">${isCorrect ? 'Correct ✔' : 'Incorrect ✖'}</span></p>`;
         html += '</div>';
     });
-    html += '<button class="btn-primary" id="closeScoreBtn" tabindex="0">Fechar</button>';
+    html += '<button class="btn-primary" id="closeScoreBtn" tabindex="0">Close</button>';
     modal.innerHTML = html;
     modal.classList.add('visible');
     modal.focus();
@@ -492,7 +492,7 @@ function showSimulatedScore(timeout = false) {
     document.getElementById('closeScoreBtn').onclick = () => {
         modal.classList.remove('visible');
         mode = 'quiz';
-        document.getElementById('modeIndicator').innerHTML = 'Modo: <strong>Quiz</strong>';
+        document.getElementById('modeIndicator').innerHTML = 'Mode: <strong>Quiz</strong>';
         asked = correctCount = wrongCount = 0;
         updateStats();
         updateStatsInlineVisibility();
@@ -502,27 +502,27 @@ function showSimulatedScore(timeout = false) {
     };
 }
 
-// === Eventos ===
+// === Events ===
 document.getElementById('btnQuiz').addEventListener('click', () => {
     mode = 'quiz';
-    document.getElementById('modeIndicator').innerHTML = 'Modo: <strong>Quiz</strong>';
+    document.getElementById('modeIndicator').innerHTML = 'Mode: <strong>Quiz</strong>';
     stopTimer();
     document.getElementById('timerDisplay').textContent = '--:--:--';
     asked = correctCount = wrongCount = 0;
     answeredQuestions.clear();
     updateStats();
     document.getElementById('btnQuiz').setAttribute('aria-pressed', 'true');
-    document.getElementById('btnSimulado').setAttribute('aria-pressed', 'false');
+    document.getElementById('btnSimulated').setAttribute('aria-pressed', 'false');
     updateStatsInlineVisibility();
     updateActionsInlineVisibility();
     nextQuestion();
 });
 
-document.getElementById('btnSimulado').addEventListener('click', () => {
-    mode = 'simulado';
-    document.getElementById('modeIndicator').innerHTML = 'Modo: <strong>Simulado</strong>';
+document.getElementById('btnSimulated').addEventListener('click', () => {
+    mode = 'simulated';
+    document.getElementById('modeIndicator').innerHTML = 'Mode: <strong>Simulated</strong>';
     document.getElementById('btnQuiz').setAttribute('aria-pressed', 'false');
-    document.getElementById('btnSimulado').setAttribute('aria-pressed', 'true');
+    document.getElementById('btnSimulated').setAttribute('aria-pressed', 'true');
     updateStatsInlineVisibility();
     updateActionsInlineVisibility();
 
@@ -531,9 +531,9 @@ document.getElementById('btnSimulado').addEventListener('click', () => {
         loadSimQuestion(0);
     } else {
         mode = 'quiz';
-        document.getElementById('modeIndicator').innerHTML = 'Modo: <strong>Quiz</strong>';
+        document.getElementById('modeIndicator').innerHTML = 'Mode: <strong>Quiz</strong>';
         document.getElementById('btnQuiz').setAttribute('aria-pressed', 'true');
-        document.getElementById('btnSimulado').setAttribute('aria-pressed', 'false');
+        document.getElementById('btnSimulated').setAttribute('aria-pressed', 'false');
         updateStatsInlineVisibility();
         updateActionsInlineVisibility();
         nextQuestion();
@@ -552,15 +552,15 @@ document.getElementById('restartBtn').addEventListener('click', () => {
     answeredQuestions.clear();
     asked = correctCount = wrongCount = 0;
     updateStats();
-    if (mode === 'simulado') {
+    if (mode === 'simulated') {
         if (prepareSimulated()) {
             startTimer(120 * 60);
             loadSimQuestion(0);
         } else {
             mode = 'quiz';
-            document.getElementById('modeIndicator').innerHTML = 'Modo: <strong>Quiz</strong>';
+            document.getElementById('modeIndicator').innerHTML = 'Mode: <strong>Quiz</strong>';
             document.getElementById('btnQuiz').setAttribute('aria-pressed', 'true');
-            document.getElementById('btnSimulado').setAttribute('aria-pressed', 'false');
+            document.getElementById('btnSimulated').setAttribute('aria-pressed', 'false');
             updateStatsInlineVisibility();
             updateActionsInlineVisibility();
             nextQuestion();
@@ -577,7 +577,7 @@ document.getElementById('categorySelect').addEventListener('change', () => {
     }
 });
 
-// === Inicialização ===
+// === Initialization ===
 loadSheet();
 updateStatsInlineVisibility();
 updateActionsInlineVisibility();
