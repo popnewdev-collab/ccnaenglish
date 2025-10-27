@@ -97,6 +97,21 @@ function showError(message) {
     setTimeout(() => errorDiv.remove(), 5000);
 }
 
+// === Função para Mostrar Mensagem Temporária de Acerto ===
+function showCorrectMessage() {
+    const messageDiv = document.createElement('div');
+    messageDiv.className = 'correct-message';
+    messageDiv.style.cssText = `
+        position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
+        background: #28a745; color: white; padding: 10px 20px; border-radius: 5px;
+        z-index: 1000; box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    `;
+    messageDiv.setAttribute('aria-live', 'assertive');
+    messageDiv.textContent = 'Acertou ✔';
+    document.body.appendChild(messageDiv);
+    setTimeout(() => messageDiv.remove(), 1000);
+}
+
 // === Carregamento de Dados ===
 async function loadSheet() {
     try {
@@ -294,9 +309,20 @@ function validateAnswer(selected) {
             if (correct.includes(l)) o.classList.add('correct');
             if (selected.includes(l) && !correct.includes(l)) o.classList.add('wrong');
         });
-        showExplanation(isCorrect);
+
+        // Limpa e oculta o elemento de explicação
+        const expl = document.getElementById('explanation');
+        expl.style.display = 'none';
+        expl.innerHTML = '';
+
         if (isCorrect) {
+            // Mostra mensagem temporária de acerto
+            showCorrectMessage();
+            // Avança para a próxima pergunta após 1 segundo
             setTimeout(nextQuestion, 1000);
+        } else {
+            // Mostra explicação apenas quando errar
+            showExplanation(false);
         }
     } else {
         const cat = current.category;
@@ -363,7 +389,7 @@ function prepareSimulated() {
         const questionsCat = allQuestions.filter(q => q.category === cat);
         if (questionsCat.length < SIM_CONFIG[cat]) {
             showError(`Não há perguntas suficientes para a categoria "${cat}". Necessário: ${SIM_CONFIG[cat]}, Disponível: ${questionsCat.length}.`);
-            return false; // Impede o início do simulado
+            return false;
         }
     }
 
@@ -384,7 +410,7 @@ function prepareSimulated() {
     answeredQuestions.clear();
     asked = correctCount = wrongCount = 0;
     updateStats();
-    return true; // Indica que a preparação foi bem-sucedida
+    return true;
 }
 
 function loadSimQuestion(i) {
@@ -500,12 +526,10 @@ document.getElementById('btnSimulado').addEventListener('click', () => {
     updateStatsInlineVisibility();
     updateActionsInlineVisibility();
 
-    // Tenta preparar o simulado
     if (prepareSimulated()) {
         startTimer(120 * 60);
         loadSimQuestion(0);
     } else {
-        // Reverte para o modo quiz se a preparação falhar
         mode = 'quiz';
         document.getElementById('modeIndicator').innerHTML = 'Modo: <strong>Quiz</strong>';
         document.getElementById('btnQuiz').setAttribute('aria-pressed', 'true');
@@ -533,7 +557,6 @@ document.getElementById('restartBtn').addEventListener('click', () => {
             startTimer(120 * 60);
             loadSimQuestion(0);
         } else {
-            // Reverte para o modo quiz se a preparação falhar
             mode = 'quiz';
             document.getElementById('modeIndicator').innerHTML = 'Modo: <strong>Quiz</strong>';
             document.getElementById('btnQuiz').setAttribute('aria-pressed', 'true');
