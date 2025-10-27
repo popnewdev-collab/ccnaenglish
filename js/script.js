@@ -83,6 +83,20 @@ function parseCSV(csv) {
     });
 }
 
+// === Função Auxiliar para Mostrar Erros ===
+function showError(message) {
+    const errorDiv = document.createElement('div');
+    errorDiv.className = 'error-message';
+    errorDiv.style.cssText = `
+        position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
+        background: #ff4d4d; color: white; padding: 10px 20px; border-radius: 5px;
+        z-index: 1000; box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    `;
+    errorDiv.textContent = message;
+    document.body.appendChild(errorDiv);
+    setTimeout(() => errorDiv.remove(), 5000);
+}
+
 // === Carregamento de Dados ===
 async function loadSheet() {
     try {
@@ -107,7 +121,7 @@ async function loadSheet() {
         }
 
         allQuestions = (data || []).map((r, idx) => ({
-            id: String(r.id || idx + 1), // MODIFICAÇÃO: Normaliza ID para string para evitar problemas de tipo no Set
+            id: String(r.id || idx + 1),
             question: (r.question || r.pergunta || '').toString(),
             questionImage: (r.questionImage || r.questionimage || r.image || '').toString(),
             options: {
@@ -170,7 +184,7 @@ function renderQuestion(q) {
     current = q;
     qMeta.textContent = mode === 'simulado' 
         ? `Pergunta ${simIndex + 1} de ${SIM_TOTAL} — Categoria: ${escapeHTML(q.category || '—')}`
-        : `ID ${escapeHTML(q.id)} — Categoria: ${escapeHTML(q.category || '—')}`; // MODIFICAÇÃO: Removido .toString() desnecessário, já que id é string
+        : `ID ${escapeHTML(q.id)} — Categoria: ${escapeHTML(q.category || '—')}`;
 
     qText.textContent = q.question;
 
@@ -217,7 +231,7 @@ function renderQuestion(q) {
     setTimeout(() => document.activeElement.blur(), 120);
     document.getElementById('questionCard').animate([{ opacity: 0 }, { opacity: 1 }], { duration: 300 });
 
-    answeredQuestions.add(q.id); // MODIFICAÇÃO: Mantido aqui para marcar como exibida
+    answeredQuestions.add(q.id);
 }
 
 // === Exibição de Explicação ===
@@ -343,16 +357,34 @@ function prepareSimulated() {
     simQuestions = [];
     simAnswers = [];
     simCategoryScores = {};
+
+    // Verifica se há perguntas suficientes para cada categoria
+    for (const cat in SIM_CONFIG) {
+        const questionsCat = allQuestions.filter(q => q.category === cat);
+        if (questionsCat.length < SIM_CONFIG[cat]) {
+            showError(`Não há perguntas suficientes para a categoria "${cat}". Necessário: ${SIM_CONFIG[cat]}, Disponível: ${questionsCat.length}.`);
+            return false; // Impede o início do simulado
+        }
+    }
+
+    // Se todas as categorias têm perguntas suficientes, prossegue
     for (const cat in SIM_CONFIG) {
         const questionsCat = shuffleArray(allQuestions.filter(q => q.category === cat));
         simQuestions.push(...questionsCat.slice(0, SIM_CONFIG[cat]));
         simCategoryScores[cat] = 0;
     }
+
+    if (simQuestions.length !== SIM_TOTAL) {
+        showError(`Erro ao preparar o simulado: Foram selecionadas ${simQuestions.length} perguntas, mas o esperado era ${SIM_TOTAL}.`);
+        return false;
+    }
+
     simQuestions = shuffleArray(simQuestions);
     simIndex = 0;
     answeredQuestions.clear();
     asked = correctCount = wrongCount = 0;
     updateStats();
+    return true; // Indica que a preparação foi bem-sucedida
 }
 
 function loadSimQuestion(i) {
@@ -439,7 +471,7 @@ function showSimulatedScore(timeout = false) {
         updateStats();
         updateStatsInlineVisibility();
         updateActionsInlineVisibility();
-        answeredQuestions.clear(); // MODIFICAÇÃO: Limpa o set ao fechar o modal para reiniciar fresco no quiz
+        answeredQuestions.clear();
         nextQuestion();
     };
 }
@@ -451,7 +483,7 @@ document.getElementById('btnQuiz').addEventListener('click', () => {
     stopTimer();
     document.getElementById('timerDisplay').textContent = '--:--:--';
     asked = correctCount = wrongCount = 0;
-    answeredQuestions.clear(); // MODIFICAÇÃO: Limpa o set ao entrar no modo quiz
+    answeredQuestions.clear();
     updateStats();
     document.getElementById('btnQuiz').setAttribute('aria-pressed', 'true');
     document.getElementById('btnSimulado').setAttribute('aria-pressed', 'false');
@@ -467,9 +499,21 @@ document.getElementById('btnSimulado').addEventListener('click', () => {
     document.getElementById('btnSimulado').setAttribute('aria-pressed', 'true');
     updateStatsInlineVisibility();
     updateActionsInlineVisibility();
-    prepareSimulated();
-    startTimer(120 * 60);
-    loadSimQuestion(0);
+
+    // Tenta preparar o simulado
+    if (prepareSimulated()) {
+        startTimer(120 * 60);
+        loadSimQuestion(0);
+    } else {
+        // Reverte para o modo quiz se a preparação falhar
+        mode = 'quiz';
+        document.getElementById('modeIndicator').innerHTML = 'Modo: <strong>Quiz</strong>';
+        document.getElementById('btnQuiz').setAttribute('aria-pressed', 'true');
+        document.getElementById('btnSimulado').setAttribute('aria-pressed', 'false');
+        updateStatsInlineVisibility();
+        updateActionsInlineVisibility();
+        nextQuestion();
+    }
 });
 
 document.getElementById('nextBtn').addEventListener('click', () => {
@@ -485,9 +529,19 @@ document.getElementById('restartBtn').addEventListener('click', () => {
     asked = correctCount = wrongCount = 0;
     updateStats();
     if (mode === 'simulado') {
-        prepareSimulated();
-        startTimer(120 * 60);
-        loadSimQuestion(0);
+        if (prepareSimulated()) {
+            startTimer(120 * 60);
+            loadSimQuestion(0);
+        } else {
+            // Reverte para o modo quiz se a preparação falhar
+            mode = 'quiz';
+            document.getElementById('modeIndicator').innerHTML = 'Modo: <strong>Quiz</strong>';
+            document.getElementById('btnQuiz').setAttribute('aria-pressed', 'true');
+            document.getElementById('btnSimulado').setAttribute('aria-pressed', 'false');
+            updateStatsInlineVisibility();
+            updateActionsInlineVisibility();
+            nextQuestion();
+        }
     } else {
         nextQuestion();
     }
@@ -495,7 +549,7 @@ document.getElementById('restartBtn').addEventListener('click', () => {
 
 document.getElementById('categorySelect').addEventListener('change', () => {
     if (mode === 'quiz') {
-        answeredQuestions.clear(); // MODIFICAÇÃO: Limpa o set ao mudar de categoria para reiniciar o ciclo fresco na nova categoria
+        answeredQuestions.clear();
         nextQuestion();
     }
 });
