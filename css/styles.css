@@ -29,10 +29,10 @@ body {
   display: flex;
   justify-content: center;
   align-items: flex-start;
-  user-select: none;
-  -webkit-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
+  user-select: none; /* Impede a seleção de texto */
+  -webkit-user-select: none; /* Para navegadores baseados em WebKit (Chrome, Safari) */
+  -moz-user-select: none; /* Para Firefox */
+  -ms-user-select: none; /* Para Edge */
 }
 
 .app {
@@ -413,30 +413,6 @@ footer {
   transition: var(--transition);
 }
 
-/* === Estilo para Mensagem de Acerto (Toast) === */
-.correct-message {
-  position: fixed;
-  top: 20px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: var(--success);
-  color: var(--text-primary);
-  padding: 0.75rem 1.25rem;
-  border-radius: 0.5rem;
-  z-index: 1000;
-  box-shadow: var(--shadow);
-  font-size: 1rem;
-  font-weight: 600;
-  animation: fadeInOut 1s ease-in-out;
-}
-
-@keyframes fadeInOut {
-  0% { opacity: 0; transform: translateX(-50%) translateY(-10px); }
-  10% { opacity: 1; transform: translateX(-50%) translateY(0); }
-  90% { opacity: 1; transform: translateX(-50%) translateY(0); }
-  100% { opacity: 0; transform: translateX(-50%) translateY(-10px); }
-}
-
 /* === Media Queries para Responsividade === */
 @media (max-width: 700px) {
   body {
@@ -494,7 +470,7 @@ footer {
     object-fit: contain;
   }
 
-  .error-message, .correct-message {
+  .error-message {
     width: 90%;
     font-size: 0.9rem;
     padding: 0.5rem 1rem;
